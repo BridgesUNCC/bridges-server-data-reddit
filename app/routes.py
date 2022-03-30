@@ -1,4 +1,5 @@
 from cgitb import small
+from concurrent.futures import thread
 from imp import cache_from_source
 from turtle import pos
 from app import app
@@ -8,21 +9,20 @@ import time
 import json
 import os
 import sys
-import sched
+from apscheduler.schedulers.background import BackgroundScheduler
 
 
 if os.getenv("REDDIT_CLIENT") is not None:
     client_id_var = int(os.getenv("REDDIT_CLIENT"))
 else:
     print("ERROR: No REDDIT_CLIENT environment variable found")
-    
     exit()
 
 if os.getenv("REDDIT_TOKEN") is not None:
     token = int(os.getenv("REDDIT_TOKEN"))
 else:
     print("ERROR: No REDDIT_TOKEN environment variable found")
-    
+
     exit()
 
 
@@ -158,7 +158,7 @@ def threaded_update():
     #generates the list of default subreddits
     sub_list = []
     for x in reddit.subreddits.default():
-        sub_list.add(x)
+        sub_list.append(x.display_name)
     for i in sub_list:
         request_reddit(i, 1000)
     print("Updated")
@@ -172,12 +172,11 @@ def html_output(data):
 
 @app.cli.command('update')
 def force_update():
-    for job in update_sched.get_jobs():
-        job.modify(next_run_time=time.time()())
+    threaded_update()
 
-update_sched = sched.BackgroundScheduler()
+update_sched = BackgroundScheduler()
 update_sched.daemonic = True
 update_sched.start()
 
-update_sched.add_job(threaded_update, 'interval', hour=8, misfire_grace_time=None)
+update_sched.add_job(threaded_update, trigger='cron', hour='0,8,16', misfire_grace_time=None)
 update_sched.print_jobs()
