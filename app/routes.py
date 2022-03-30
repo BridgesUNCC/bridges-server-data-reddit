@@ -13,13 +13,13 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 
 if os.getenv("REDDIT_CLIENT") is not None:
-    client_id_var = int(os.getenv("REDDIT_CLIENT"))
+    client_id_var = os.getenv("REDDIT_CLIENT")
 else:
     print("ERROR: No REDDIT_CLIENT environment variable found")
     exit()
 
 if os.getenv("REDDIT_TOKEN") is not None:
-    token = int(os.getenv("REDDIT_TOKEN"))
+    token = os.getenv("REDDIT_TOKEN")
 else:
     print("ERROR: No REDDIT_TOKEN environment variable found")
 
