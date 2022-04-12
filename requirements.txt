@@ -1,0 +1,4 @@
+APScheduler==3.9.1
+Flask==2.1.1
+praw==7.5.0
+pyparsing==3.0.8

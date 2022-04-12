@@ -6,10 +6,12 @@ from turtle import pos
 from pyparsing import empty
 from app import app
 from flask import request
+from flask import abort
 import praw
 import time
 import json
 import os
+import shutil
 import sys
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -24,8 +26,10 @@ if os.getenv("REDDIT_TOKEN") is not None:
     token = os.getenv("REDDIT_TOKEN")
 else:
     print("ERROR: No REDDIT_TOKEN environment variable found")
-
     exit()
+
+if not os.path.isdir("app/reddit_data"):
+    os.mkdir("app/reddit_data")
 
 sub_list = []
 
@@ -54,10 +58,24 @@ def defaultroute():
     return f"<html><body>{out}</body></html>"
     #return out
 
-
+""" Cache Route
+    get:
+        summary: returns a cached subreddit snapshot
+        description: Searches the local cache for a subreddit and timestamp match to the query
+        path: /cache
+        parameters:
+            subreddit (String): the subreddit you want the snapshot of
+            time_request (int): (OPTIONAL) give a UNIX timestamp of when you want the snapshot to be (Defaults to most recent if no value given)
+        responses:
+            200:
+                description: a json string object that contains the subreddit snapshot
+"""
 @app.route('/cache')
 def request_cached_subreddit():
-    subreddit_name = request.args.get("subreddit")
+    try:
+        subreddit_name = request.args.get("subreddit")
+    except:
+        abort(400)
     time_request = request.args.get("time_request")
     check = cache_lookup(subreddit_name, time_request)
     if check != None:
@@ -68,8 +86,19 @@ def request_cached_subreddit():
 
         return html_output(data)
     else:
-        return "Subreddit not valid"
+        abort(400)
 
+""" List Route
+    get:
+        summary: returns a list of cached subreddit snapshot
+        description: Generates a HTML string to display the list of avalible reddit snapshots
+        path: /list
+        parameters:
+            None
+        responses:
+            200:
+                description: A HTML string with the avaliable subreddit snapshots
+"""
 @app.route('/list')
 def return_list():
     sub_reddit_list = ""
@@ -139,6 +168,11 @@ def old_cache_lookup(subreddit_name):
         return return_file_dir
     return None
 
+
+'''
+Takes in a subreddit object and parses it out into
+our own json format to get ride of useless info
+'''
 def generate_sub_json(sub):
     sub_json = {}
     sub_json['id'] = sub.id
@@ -156,7 +190,6 @@ def generate_sub_json(sub):
 
     return sub_json
 
-
 def threaded_update():
     reddit = praw.Reddit(
         client_id=client_id_var,
@@ -172,7 +205,6 @@ def threaded_update():
         request_reddit(i, 1000)
     print("Updated")
 
-
 def html_output(data):
     out = ""
     for post in data:
@@ -182,6 +214,21 @@ def html_output(data):
 @app.cli.command('update')
 def force_update():
     threaded_update()
+
+@app.cli.command('clear')
+def clear_cache():
+    shutil.rmtree("app/reddit_data")
+    os.mkdir("app/reddit_data")
+
+''' 400 Errors
+Handles an abort(400) request
+This is mainly used for when the subreddit the user requested isnt in the list
+or they left that variable blank
+'''    
+@app.errorhandler(400)
+def no_subreddit():
+    #returns an error string if the subreddit is invalid
+    return "400 Error Subreddit not valid", 400
 
 update_sched = BackgroundScheduler()
 update_sched.daemonic = True
