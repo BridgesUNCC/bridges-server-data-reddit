@@ -2,6 +2,8 @@ from cgitb import small
 from concurrent.futures import thread
 from imp import cache_from_source
 from turtle import pos
+
+from pyparsing import empty
 from app import app
 from flask import request
 import praw
@@ -25,6 +27,7 @@ else:
 
     exit()
 
+sub_list = []
 
 
 # recommended subreddits: news, Showerthoughts, technology, movies, worldnews, space, nosleep
@@ -67,6 +70,12 @@ def request_cached_subreddit():
     else:
         return "Subreddit not valid"
 
+@app.route('/list')
+def return_list():
+    sub_reddit_list = ""
+    for i in sub_list:
+        sub_reddit_list = sub_reddit_list + i + "<br>"
+    return sub_reddit_list
 
 def request_reddit(subreddit_name, post_limit):
     reddit = praw.Reddit(
@@ -156,9 +165,9 @@ def threaded_update():
     )
 
     #generates the list of default subreddits
-    sub_list = []
-    for x in reddit.subreddits.default():
-        sub_list.append(x.display_name)
+    if not sub_list:
+        for x in reddit.subreddits.default():
+            sub_list.append(x.display_name)
     for i in sub_list:
         request_reddit(i, 1000)
     print("Updated")
