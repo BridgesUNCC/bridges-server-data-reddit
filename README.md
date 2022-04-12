@@ -18,11 +18,36 @@ The parameters to pass are:
 The returned data is in json format such as:
 ```json
 {
+"t8tkkx": {
+        "id": "t8tkkx",
+        "title": "How did y'all started learning programming to the point where you are now?(Story time)",
+        "author": "NotEnoughBOOST-_-",
+        "score": 10,
+        "vote_ratio": 0.92,
+        "comment_count": 21,
+        "subreddit": "learnprogramming",
+        "post_time": 1646671850.0,
+        "url": "https://www.reddit.com/r/learnprogramming/comments/t8tkkx/how_did_yall_started_learning_programming_to_the/",
+        "text": "So I thought I would ask different people about ... getting into a good job etc. It would be re"
+    },
+    "t837bf": {
+        "id": "t837bf",
+        "title": "What does a day in the life of a junior dev look like?",
+        "author": "Ssacrificial",
+        "score": 784,
+        "vote_ratio": 0.97,
+        "comment_count": 81,
+        "subreddit": "learnprogramming",
+        "post_time": 1646586419.0,
+        "url": "https://www.reddit.com/r/learnprogramming/comments/t837bf/what_does_a_day_in_the_life_of_a_junior_dev_look/",
+        "text": "Hello beautiful ... my job."
+    },
+    ...
 }
 ```
 ### Requesting a list of avalible subreddits
 Go here to this URL to get a list of the avalible subreddit snapshots we have cached locally.
-```     ```
+```http://192.168.2.14:9999/list```
 
 
 
