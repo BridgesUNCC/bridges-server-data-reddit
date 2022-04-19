@@ -9,6 +9,8 @@ from flask import request
 from flask import abort
 import praw
 import time
+from logging.handlers import RotatingFileHandler
+import logging
 import json
 import os
 import shutil
@@ -27,6 +29,13 @@ if os.getenv("REDDIT_TOKEN") is not None:
 else:
     print("ERROR: No REDDIT_TOKEN environment variable found")
     exit()
+
+if os.getenv("CACHE_TIME") is not None:
+    cache_store_time = os.getenv("CACHE_TIME")
+else:
+    cache_store_time = 14   # This is days, change this
+    cache_store_time = cache_store_time * 86400 #seconds in a day
+
 
 if not os.path.isdir("app/reddit_data"):
     os.mkdir("app/reddit_data")
@@ -197,6 +206,11 @@ def threaded_update():
         user_agent="bridges-test",
     )
 
+
+    # TWO WEEK CACHING LIMIT, ENVIRONMENT VARIABLE WITH DEAFULT 2 WEEKS
+
+    ar = os.listdir("app/reddit_data")
+
     #generates the list of default subreddits
     if not sub_list:
         for x in reddit.subreddits.default():
@@ -204,6 +218,13 @@ def threaded_update():
     for i in sub_list:
         request_reddit(i, 1000)
     print("Updated")
+    for f in ar:
+        file_split = f.split("_")
+        file_time = int(file_split[2].replace(".json", ""))
+        if (int(time.time()) - file_time) > cache_store_time:
+            os.remove(f"app/reddit_data/{f}")
+
+
 
 def html_output(data):
     out = ""
@@ -229,6 +250,24 @@ or they left that variable blank
 def no_subreddit():
     #returns an error string if the subreddit is invalid
     return "400 Error Subreddit not valid", 400
+
+
+#setting up the server log
+format = logging.Formatter('%(asctime)s %(message)s') 
+
+logFile = 'log.log'
+my_handler = RotatingFileHandler(logFile, mode='a', maxBytes=5*1024*1024,
+                                 backupCount=2, encoding=None, delay=0)
+my_handler.setFormatter(format)
+my_handler.setLevel(logging.INFO)
+
+app_log = logging.getLogger('root')
+app_log.setLevel(level=logging.INFO)
+
+app_log.addHandler(my_handler)
+
+
+
 
 update_sched = BackgroundScheduler()
 update_sched.daemonic = True
