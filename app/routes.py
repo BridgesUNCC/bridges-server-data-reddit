@@ -86,6 +86,8 @@ def request_cached_subreddit():
     except:
         abort(400)
     time_request = request.args.get("time_request")
+    if time_request == None or time_request < 0:
+        time_request = time.time()
     check = cache_lookup(subreddit_name, time_request)
     if check != None:
         #load file and return
@@ -93,7 +95,7 @@ def request_cached_subreddit():
         data = json.load(f)
         f.close()
 
-        return html_output(data)
+        return data
     else:
         abort(400)
 
@@ -247,7 +249,7 @@ This is mainly used for when the subreddit the user requested isnt in the list
 or they left that variable blank
 '''    
 @app.errorhandler(400)
-def no_subreddit():
+def no_subreddit(e):
     #returns an error string if the subreddit is invalid
     return "400 Error Subreddit not valid", 400
 
