@@ -3,7 +3,6 @@ from concurrent.futures import thread
 from imp import cache_from_source
 from turtle import pos
 
-from pyparsing import empty
 from app import app
 from flask import request
 from flask import abort
