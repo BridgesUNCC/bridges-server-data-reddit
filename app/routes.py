@@ -98,6 +98,24 @@ def request_cached_subreddit():
     else:
         abort(400)
 
+
+@app.route('/hash')
+def reddit_hash():
+    try:
+        subreddit_name = request.args.get("subreddit")
+    except:
+        abort(400)
+    time_request = request.args.get("time_request")
+    if time_request == None or time_request < 0:
+        time_request = time.time()
+    
+    fi = cache_lookup(subreddit_name, time_request)
+    if fi != None:
+        return fi.replace(".json", "")
+    return "false"
+
+
+
 """ List Route
     get:
         summary: returns a list of cached subreddit snapshot
@@ -135,7 +153,10 @@ def request_reddit(subreddit_name, post_limit):
         #print(f"{sub.title} | {sub.author} | {sub.score}")
         temp_json = generate_sub_json(sub)
         outputdata[f"{sub.id}"] = temp_json
-    file_name = f"redditdata_{subreddit_name}_{int(time.time())}"
+
+
+    time_marker = int(time.time()) #time of file generation
+    file_name = f"redditdata_{subreddit_name}_{time_marker}"
 
     with open(f"app/reddit_data/{file_name}.json", "w") as outfile:
         json.dump(outputdata, outfile)
