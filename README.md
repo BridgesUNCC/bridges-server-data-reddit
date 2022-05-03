@@ -47,7 +47,7 @@ The returned data is in json format such as:
 ```
 ### Requesting a list of avalible subreddits
 Go here to this URL to get a list of the avalible subreddit snapshots we have cached locally.
-```http://192.168.2.14:9999/list```
+```http://bridges-data-server-reddit-t.bridgesuncc.org/list```
 
 
 
