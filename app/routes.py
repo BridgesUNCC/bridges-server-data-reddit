@@ -232,7 +232,7 @@ def threaded_update():
     )
 
 
-    # TWO WEEK CACHING LIMIT, ENVIRONMENT VARIABLE WITH DEAFULT 2 WEEKS
+    # TWO WEEK CACHING LIMIT, ENVIRONMENT VARIABLE WITH DEFAULT 2 WEEKS
     print("Updating...")
     ar = os.listdir("app/reddit_data")
 
