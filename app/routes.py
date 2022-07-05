@@ -1,8 +1,9 @@
 from cgitb import small
 from concurrent.futures import thread
 from imp import cache_from_source
-from turtle import pos
+#from turtle import pos
 
+from datetime import datetime
 from app import app
 from flask import request
 from flask import abort
@@ -85,6 +86,8 @@ def request_cached_subreddit():
     except:
         abort(400)
     time_request = request.args.get("time_request")
+    if time_request != None:
+        time_request = int(time_request)
     if time_request == None or time_request < 0:
         time_request = time.time()
     check = cache_lookup(subreddit_name, time_request)
@@ -230,7 +233,7 @@ def threaded_update():
 
 
     # TWO WEEK CACHING LIMIT, ENVIRONMENT VARIABLE WITH DEAFULT 2 WEEKS
-
+    print("Updating...")
     ar = os.listdir("app/reddit_data")
 
     #generates the list of default subreddits
@@ -295,5 +298,5 @@ update_sched = BackgroundScheduler()
 update_sched.daemonic = True
 update_sched.start()
 
-update_sched.add_job(threaded_update, trigger='cron', hour='0,8,16', misfire_grace_time=None)
+update_sched.add_job(threaded_update, trigger='cron', hour='0,8,16', misfire_grace_time=None, max_instances=1)
 update_sched.print_jobs()
