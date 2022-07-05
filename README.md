@@ -52,7 +52,15 @@ Go here to this URL to get a list of the avalible subreddit snapshots we have ca
 
 
 ## Running the server locally
-Make sure to have all the dependices installed from the requirements file
+Make sure to have all the dependencies installed from the requirements file
+
+### Getting reddit credentials
+
+You'll need a reddit account and credential for an app set by reddit.
+
+Follow the process given at [https://rymur.github.io/setup].
+
+export in the environment of the flask server you clientID as ```REDDIT_CLIENT``` and you API token as ```REDDIT_TOKEN```
 
 ### Linux
 
