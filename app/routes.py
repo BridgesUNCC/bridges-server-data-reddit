@@ -7,6 +7,7 @@ from datetime import datetime
 from app import app
 from flask import request
 from flask import abort
+from flask import jsonify
 import praw
 import time
 from logging.handlers import RotatingFileHandler
@@ -16,6 +17,8 @@ import os
 import shutil
 import sys
 from apscheduler.schedulers.background import BackgroundScheduler
+
+
 
 
 if os.getenv("REDDIT_CLIENT") is not None:
@@ -122,13 +125,13 @@ def reddit_hash():
 """ List Route
     get:
         summary: returns a list of cached subreddit snapshot
-        description: Generates a HTML string to display the list of avalible reddit snapshots
+        description: Generates a HTML string to display the list of available reddit snapshots
         path: /list
         parameters:
             None
         responses:
             200:
-                description: A HTML string with the avaliable subreddit snapshots
+                description: A HTML string with the available subreddit snapshots
 """
 @app.route('/list')
 def return_list():
@@ -136,6 +139,27 @@ def return_list():
     for i in sub_list:
         sub_reddit_list = sub_reddit_list + i + "<br>"
     return sub_reddit_list
+
+
+""" ListJSON Route 
+    get:
+        summary: returns a list of cached subreddit snapshot
+        description: Generates a JSON list of available reddit snapshots
+        path: /listJSON
+        parameters:
+            None
+        responses:
+            200:
+                description: A JSON array of string with the available subreddit snapshots
+"""
+@app.route('/listJSON')
+def return_listJSON():
+    sub_reddit_list = []
+    for i in sub_list:
+        sub_reddit_list.append(i)
+    
+    return jsonify(sub_reddit_list)
+
 
 def request_reddit(subreddit_name, post_limit):
     reddit = praw.Reddit(
@@ -220,8 +244,6 @@ def generate_sub_json(sub):
     sub_json['url'] = sub.url
     sub_json['text'] = sub.selftext
     
-
-
     return sub_json
 
 def threaded_update():
@@ -298,5 +320,5 @@ update_sched = BackgroundScheduler()
 update_sched.daemonic = True
 update_sched.start()
 
-update_sched.add_job(threaded_update, trigger='cron', hour='0,8,16', misfire_grace_time=None, max_instances=1)
+update_sched.add_job(threaded_update, trigger='cron', hour='0,8,16', misfire_grace_time=None, max_instances=1) #add  next_run_time=datetime.now() to run the update immediately
 update_sched.print_jobs()
