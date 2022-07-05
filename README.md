@@ -45,10 +45,11 @@ The returned data is in json format such as:
     ...
 }
 ```
-### Requesting a list of avalible subreddits
+### Requesting a list of available subreddits
 Go here to this URL to get a list of the avalible subreddit snapshots we have cached locally.
 ```http://bridges-data-server-reddit-t.bridgesuncc.org/list```
 
+This can also be requested progammatically at ```http://bridges-data-server-reddit-t.bridgesuncc.org/listJSON``` which returns a JSON array of strings containing the subreddit names
 
 
 ## Running the server locally
